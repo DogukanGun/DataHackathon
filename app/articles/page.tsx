@@ -1,28 +1,29 @@
 "use client"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { Schema, tableName } from "../data/database.data";
+import { Schema, tableName } from "../../data/database.data";
 import { Database } from "@tableland/sdk";
+import ArticleBox from "@/components/article/box/ArticleBox";
 
 const Messages = () => {
 
-    const [allArticles,setAllArticles] = useState<Schema[]>([])
+    const [allArticles, setAllArticles] = useState<Schema[]>([])
 
-    useEffect(()=>{
+    useEffect(() => {
         const db = new Database<Schema>();
-        db.prepare<Schema>(`SELECT * FROM ${tableName};`).all()
-            .then((res)=>{
+        db.prepare(`SELECT * FROM ${tableName};`).all()
+            .then((res) => {
                 console.log(res);
-                
+
                 setAllArticles(res.results)
             })
 
-    },[])
+    }, [])
 
     return (
         <>
             <div className="w-full">
-                <div className="bg-white py-6 sm:py-8 lg:py-12">
+                <div className="bg-white py-4 sm:py-8 lg:py-12">
                     <div className="mx-auto max-w-screen-2xl px-4 md:px-8">
                         <div className="flex flex-col items-center justify-between gap-4 rounded-lg bg-gray-100 p-4 sm:flex-row md:p-8">
                             <div>
@@ -35,12 +36,19 @@ const Messages = () => {
                     </div>
                 </div>
             </div>
-            <div>
-                { 
-                    allArticles.map((article)=>{
-                        return <p className="text-black">{article.title}</p>
-                    })
-                }
+            <div className="bg-white py-4 sm:py-8 lg:py-12">
+                <div className="mx-auto max-w-screen-2xl px-4 md:px-8">
+                    <div className="mb-10 md:mb-16">
+                        <h2 className="mb-4 text-center text-2xl font-bold text-gray-800 md:mb-6 lg:text-3xl">Articles</h2>
+                    </div>
+                    <div className="grid gap-x-4 gap-y-8 sm:grid-cols-2 md:gap-x-6 lg:grid-cols-3 xl:grid-cols-4">
+                        {
+                            allArticles.map((article) => {
+                                return <ArticleBox article={article}/>
+                            })
+                        } 
+                    </div>
+                </div>
             </div>
         </>
 

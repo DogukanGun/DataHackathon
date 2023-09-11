@@ -6,4 +6,4 @@ export interface Schema {
     article: string;
 }
 
-export const tableName = "datahack_article_table_314159_268"
+export const tableName = "datahack_articles_table_314159_271"

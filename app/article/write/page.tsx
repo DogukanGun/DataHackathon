@@ -4,7 +4,7 @@ import { Database } from "@tableland/sdk";
 import { uuid } from "uuidv4";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { Schema, tableName } from "@/app/data/database.data";
+import { Schema, tableName } from "@/data/database.data";
 
   
 const ArticleWrite = () => {
@@ -20,9 +20,9 @@ const ArticleWrite = () => {
     useEffect(()=>{
         /*const startTable = async() =>{
             const db = new Database<Schema>();
-            const prefix: string = "datahack_article_table";
+            const prefix: string = "datahack_articles_table";
             const { meta: create } = await db
-            .prepare(`CREATE TABLE ${prefix} (id integer primary key, name text);`)
+            .prepare(`CREATE TABLE ${prefix} (id text primary key, owner text, title text, subtitle text, article text);`)
             .run();
             console.log(create);
             return create.txn?.name
@@ -41,10 +41,12 @@ const ArticleWrite = () => {
             const db = new Database<Schema>();
             const account = await connector?.getAccount()
             const id = uuid().toString()
+            console.log("account",account,"title",title,"id",id,"subtitle",subtitle,"article",article);
             const { meta: insert } = await db
                 .prepare(`INSERT INTO ${tableName} (id, owner, title, subtitle, article) VALUES (?, ?, ?, ?, ?);`)
                 .bind(id,account,title,subtitle,article)
                 .run();
+            await insert.txn?.wait();
             console.log(insert.txn)
         }
     }
