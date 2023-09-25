@@ -1,16 +1,21 @@
 "use client"
 import CoinSelecter from "@/components/coinselecter/CoinSelecter";
-import CustomTable from "@/components/table/CustomTable";
+import CustomTable, { CustomTableIndex } from "@/components/table/CustomTable";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Database } from "@tableland/sdk";
 import { Token, Uniswap, uniswapQuery } from "@/data/database.uniswap";
 import dotenv from "dotenv"
+import { DashboardStatus } from "@/data/dashboard.status.data";
+import redstone from 'redstone-api';
+
 const Dashboard = () => {
 
     const [uniswapData, setUniswapData] = useState<Token[]>([])
-    const [token0,setToken0] = useState("");
-    const [token1,setToken1] = useState("");
+    const [token0, setToken0] = useState("");
+    const [token1, setToken1] = useState("");
+    const [tableData,setTableData] = useState<CustomTableIndex[]>([])
+    const [tableStatus,setTableStatus] = useState(DashboardStatus.uniswapDex)
     const uniswapTable = "datahack_token_table_314159_314"
     const db = new Database<Token>();
 
@@ -71,19 +76,42 @@ const Dashboard = () => {
         if (uniswapData.length == 0) {
             checkUniswapTokensAndLoad()
         }
-        if(token0 !== "" && token1 !== ""){
+        if (token0 !== "" && token1 !== "") {
             //send request
         }
-    },[token0,token1])
+        if (tableStatus === DashboardStatus.priceOracle){
+            redstone.getAllPrices()
+                .then((response)=>{
+                    const newTableData = Object.keys(response).map((symbol) => ({
+                        coins: symbol,
+                        price: response[symbol].value.toString()
+                    }));
+                    setTableData(newTableData)
+                })
+        }
+    }, [token0, token1, tableStatus ])
+
+    const handleDashboardButtonStatus = (event: never) =>{
+        if (tableStatus === DashboardStatus.priceOracle){
+            setTableStatus(DashboardStatus.uniswapDex)
+        }else if (tableStatus === DashboardStatus.uniswapDex){
+            setTableStatus(DashboardStatus.priceOracle)
+        }
+    }
 
     return (
         <>
             <div className="w-full flex justify-items-stretch">
-                <CoinSelecter onChange={(value)=>{setToken0(value)}} data={uniswapData} />
-                <CoinSelecter onChange={(value)=>{setToken1(value)}} data={uniswapData} />
+                <CoinSelecter onChange={(value) => { setToken0(value) }} data={uniswapData} />
+                <CoinSelecter onChange={(value) => { setToken1(value) }} data={uniswapData} />
+            </div>
+            <div className="w-full mt-10">
+                <button onClick={handleDashboardButtonStatus} type="button" className="w-1/4 ml-5 text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                    {tableStatus === DashboardStatus.uniswapDex ? "See Price Oracle" : "See Uniswap Dec"}
+                </button>
             </div>
             <div className="mt-10 w-full">
-                <CustomTable />
+                <CustomTable data={tableData}/>
             </div>
         </>
     )

@@ -9,24 +9,31 @@ import Paper from '@mui/material/Paper';
 import { rows } from './create-dumy-data';
 import CustomRow from './CustomRow';
 
+export interface CustomTableIndex {
+  coins:string
+  isSell?:boolean
+  price:string
+}
 
-const CustomTable = () => {
+interface CustomTableProps {
+  data:CustomTableIndex[]
+}
+
+const CustomTable = (props:CustomTableProps) => {
   return (
     <TableContainer className='w-full' component={Paper}>
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>Dessert (100g serving)</TableCell>
-            <TableCell align="right">Calories</TableCell>
-            <TableCell align="right">Fat&nbsp;(g)</TableCell>
-            <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-            <TableCell align="right">Protein&nbsp;(g)</TableCell>
+            <TableCell align="left">Coin or Coins</TableCell>
+            <TableCell align="right">Price</TableCell>
+            <TableCell align="right">What Should be Done?</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <CustomRow key={row.name} row={row} />
+          {props.data.map((row:CustomTableIndex) => (
+            <CustomRow coins={row.coins} price={row.price} isSell={row.isSell}  />
           ))}
         </TableBody>
       </Table>

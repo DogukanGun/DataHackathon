@@ -17,8 +17,8 @@ func main() {
 	}
 
 	// Access the first and second arguments.
-	token0 := os.Args[1]
-	token1 := os.Args[2]
+	token0 := os.Getenv("token0")
+	token1 := os.Getenv("token1")
 	envNames := []string{"ETH_URL"}
 	status, _, envMap := InitializeENV(envNames, ".env")
 	if !status {
@@ -26,6 +26,7 @@ func main() {
 		os.Exit(1)
 	}
 	client, err := ethclient.Dial(envMap["ETH_URL"])
+
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error in client connection: %s", err))
 		os.Exit(1)
