@@ -2,6 +2,7 @@ package main
 
 import (
 	"execution/uniswap"
+	"execution/uniswap/oracle"
 	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
@@ -35,6 +36,25 @@ func main() {
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error in price calculation: %s", err))
 		os.Exit(1)
+	}
+	oracleResponseChannelToken0 := make(chan oracle.PriceOracleResponse)
+	oracleResponseChannelToken1 := make(chan oracle.PriceOracleResponse)
+	go oracle.RedStonePriceOracle(token0, client, oracleResponseChannelToken0)
+	go oracle.RedStonePriceOracle(token1, client, oracleResponseChannelToken1)
+	// Get the data from the oracle
+	dataForToken0 := <-oracleResponseChannelToken0
+	dataForToken1 := <-oracleResponseChannelToken1
+
+	if dataForToken0.Error == nil && dataForToken1.Error == nil {
+		priceForToken0 := dataForToken0.Price
+		priceForToken1 := dataForToken1.Price
+		priceFromPool := (price * priceForToken0) - priceForToken1
+		if priceForToken0 < priceFromPool {
+			fmt.Println(fmt.Sprintf("Oppurtinaty to sell %s", token0))
+		} else {
+			fmt.Println(fmt.Sprintf("Oppurtinaty to buy %s", token0))
+		}
+		fmt.Println(fmt.Sprintf("%.7f", (priceFromPool-priceForToken0)/100))
 	}
 	fmt.Println(price)
 }

@@ -33,10 +33,8 @@ contract LilypadDataHackathon is LilypadCallerInterface {
         _;
     }
 
-    function GetScore() external payable {
+    function GetScore(address token0, address token1) external payable {
         require(msg.value >= lilypadFee, "Not enough to run Lilypad job");
-
-        string memory targetAddress = addressToString(msg.sender);
 
         string memory spec = string(abi.encodePacked(
             "{",
@@ -44,8 +42,10 @@ contract LilypadDataHackathon is LilypadCallerInterface {
             '"Verifier": "Noop",',
             '"Publisher": "Estuary",',
             '"PublisherSpec": {"Type": "Estuary"},',
-            '"Docker": {"Image": "dogukangun/datahackathon:go", "EnvironmentVariables": ["TARGET_ADDRESS=',
-            targetAddress,
+            '"Docker": {"Image": "dogukangun/datahackathon:go", "EnvironmentVariables": ["token0"=',
+            token0,
+            ',"token1"=',
+            token1,
             '"]},',
             '"Language": {"JobContext": {}},',
             '"Wasm": {"EntryModule": {}},',
