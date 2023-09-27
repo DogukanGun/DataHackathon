@@ -2,7 +2,6 @@
 pragma solidity >=0.8.4;
 import "https://github.com/bacalhau-project/lilypad-v0/blob/main/hardhat/contracts/LilypadEventsUpgradeable.sol";
 import "https://github.com/bacalhau-project/lilypad-v0/blob/main/hardhat/contracts/LilypadCallerInterface.sol";
-import "hardhat/console.sol";
 
 contract LilypadDataHackathon is LilypadCallerInterface {
     address public bridgeAddress;
@@ -33,7 +32,7 @@ contract LilypadDataHackathon is LilypadCallerInterface {
         _;
     }
 
-    function GetScore(address token0, address token1) external payable {
+    function GetScore(address token0, address token1,string calldata token0Price, string calldata token1Price) external payable {
         require(msg.value >= lilypadFee, "Not enough to run Lilypad job");
 
         string memory spec = string(abi.encodePacked(
@@ -42,10 +41,17 @@ contract LilypadDataHackathon is LilypadCallerInterface {
             '"Verifier": "Noop",',
             '"Publisher": "Estuary",',
             '"PublisherSpec": {"Type": "Estuary"},',
-            '"Docker": {"Image": "dogukangun/datahackathon:go", "EnvironmentVariables": ["token0"=',
+            '"Docker": {"Image": "dogukangun/datahackathon:go", "EnvironmentVariables": ["token0=',
             token0,
-            ',"token1"=',
+            '",',
+            '"token1=',
             token1,
+            '",',
+            '"token0Price=',
+            token0Price,
+            '",',
+            '"token1Price=',
+            token1Price,
             '"]},',
             '"Language": {"JobContext": {}},',
             '"Wasm": {"EntryModule": {}},',
@@ -71,9 +77,6 @@ contract LilypadDataHackathon is LilypadCallerInterface {
     ) external override {
         require(_from == address(bridge)); 
         require(_resultType == LilypadResultType.CID);
-
-        console.log("Job Id: ", _jobId, " has been fulfilled with result: ", _result);
-
         // Save the CID against the caller's address
         jobResults[jobIDs[_jobId]] = _result;
         emit NewResult(jobIDs[_jobId], _result);
@@ -86,7 +89,6 @@ contract LilypadDataHackathon is LilypadCallerInterface {
         string calldata _errorMsg
     ) external override {
         require(_from == address(bridge)); 
-        console.log(_errorMsg);
         delete jobIDs[_jobId];
     }
 }
