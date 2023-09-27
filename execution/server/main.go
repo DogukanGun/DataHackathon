@@ -2,12 +2,12 @@ package main
 
 import (
 	"execution/uniswap"
-	"execution/uniswap/oracle"
 	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -37,26 +37,24 @@ func main() {
 		fmt.Println(fmt.Sprintf("Error in price calculation: %s", err))
 		os.Exit(1)
 	}
-	oracleResponseChannelToken0 := make(chan oracle.PriceOracleResponse)
-	oracleResponseChannelToken1 := make(chan oracle.PriceOracleResponse)
-	go oracle.RedStonePriceOracle(token0, client, oracleResponseChannelToken0)
-	go oracle.RedStonePriceOracle(token1, client, oracleResponseChannelToken1)
-	// Get the data from the oracle
-	dataForToken0 := <-oracleResponseChannelToken0
-	dataForToken1 := <-oracleResponseChannelToken1
 
-	if dataForToken0.Error == nil && dataForToken1.Error == nil {
-		priceForToken0 := dataForToken0.Price
-		priceForToken1 := dataForToken1.Price
-		priceFromPool := (price * priceForToken0) - priceForToken1
-		if priceForToken0 < priceFromPool {
-			fmt.Println(fmt.Sprintf("Oppurtinaty to sell %s", token0))
-		} else {
-			fmt.Println(fmt.Sprintf("Oppurtinaty to buy %s", token0))
-		}
-		fmt.Println(fmt.Sprintf("%.7f", (priceFromPool-priceForToken0)/100))
+	priceForToken0Str := os.Getenv("token0Price")
+	priceForToken1Str := os.Getenv("token1Price")
+	priceForToken0 := float64(0)
+	priceForToken1 := float64(0)
+	if s, err := strconv.ParseFloat(priceForToken0Str, 64); err == nil {
+		priceForToken0 = s // 3.1415927410125732
 	}
-	fmt.Println(price)
+	if s, err := strconv.ParseFloat(priceForToken1Str, 64); err == nil {
+		priceForToken1 = s // 3.1415927410125732
+	}
+	priceFromPool := (price * priceForToken0) - priceForToken1
+	if priceForToken0 < priceFromPool {
+		fmt.Println(fmt.Sprintf("Oppurtinaty to sell %s", token0))
+	} else {
+		fmt.Println(fmt.Sprintf("Oppurtinaty to buy %s", token0))
+	}
+	fmt.Println(fmt.Sprintf("%.7f", (priceFromPool-priceForToken0)/100))
 }
 
 // Function to initialize the variables
