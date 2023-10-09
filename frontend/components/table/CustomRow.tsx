@@ -25,7 +25,8 @@ const CustomRow = (props:CustomTableIndex) =>{
             {props.coins}
           </TableCell>
           <TableCell align="right">{props.price}</TableCell>
-          {props.isSell !== null && <TableCell align="right">{props.isSell}</TableCell>}
+          {props.isSell && <TableCell align="right">Sell</TableCell>}
+          {!props.isSell && <TableCell align="right">Buy</TableCell>}
           {props.isSell === null && <TableCell align="right"> - </TableCell>}
         </TableRow>
         <TableRow>
